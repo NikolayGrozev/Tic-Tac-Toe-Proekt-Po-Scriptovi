@@ -16,6 +16,33 @@ def get_users(request):
     return Response(serializer.data)
 
 @api_view(['POST'])
+def add_friend(request: Request, user_pk, friend_pk, format = None):
+    try:
+        user = models.UserProfile.objects.get(pk = user_pk)
+        friend = models.UserProfile.objects.get(pk = friend_pk)
+    except models.UserProfile.DoesNotExist:
+        Http404()
+    
+
+    user.friends.add(friend)
+    userSerializer = serializers.UserSerializer(user, many = False)
+
+    return Response(userSerializer.data, status = HTTP_201_CREATED)
+
+@api_view(['DELETE'])
+def remove_friend(request: Request, user_pk, friend_pk, format = None):
+    try:
+        user = models.UserProfile.objects.get(pk = user_pk)
+        friend = models.UserProfile.objects.get(pk = friend_pk)
+    except models.UserProfile.DoesNotExist:
+        Http404()
+
+    user.friends.remove(friend)
+    userSerializer = serializers.UserSerializer(user)
+
+    return Response(userSerializer.data, status = HTTP_204_NO_CONTENT)
+
+@api_view(['POST'])
 def create_user(request : Request, format = None):
     serializer = serializers.UserSerializer(data = request.data)
     if serializer.is_valid():
