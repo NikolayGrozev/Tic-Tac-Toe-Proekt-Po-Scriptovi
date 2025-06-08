@@ -1,5 +1,6 @@
 from django.urls import path, include
 from app import views
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     path('users/', views.get_users, name = 'user_list'),
@@ -8,5 +9,7 @@ urlpatterns = [
     path('users/<int:user_pk>/add-friend/<int:friend_pk>/', views.add_friend, name='add_friend'),
     path('users/<int:user_pk>/remove-friend/<int:friend_pk>/', views.remove_friend, name = 'unfriend'),
     path('users/<int:pk>/games', views.get_user_games, name = 'games'),
-    path('users/create-game/player1=<int:pk_player_x>/player2=<int:pk_player_o>', views.create_game, name='create game')
+    path('users/create-game/player1=<int:pk_player_x>/player2=<int:pk_player_o>', views.create_game, name='create game'),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh')
 ]

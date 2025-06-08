@@ -42,7 +42,7 @@ def validate_moves_schema(value):
         raise ValidationError(f"Invalid move data: {e.message}")
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete = models.CASCADE)
+    user = models.OneToOneField(User, on_delete = models.CASCADE, related_name='profile')
     friends = models.ManyToManyField('self', blank=True, symmetrical=True)
 
 class Game(models.Model):
