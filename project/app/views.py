@@ -8,6 +8,7 @@ from . import models
 from . import serializers
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT, HTTP_200_OK
 from django.db.models import Q
+from .utils import calculate_winner
 
 
 @api_view(['GET'])
@@ -105,6 +106,11 @@ def create_game(request: Request, pk_player_x, pk_player_o, format = None):
     serializer = serializers.GameSerializer(data = data)
 
     if serializer.is_valid():
+        moves = data.get('moves', [])
+        winner = calculate_winner(moves)
+        serializer.validated_data['winner'] = winner
+
+
         serializer.save()
         return Response(serializer.data, status=HTTP_201_CREATED)
     
