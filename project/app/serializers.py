@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile, Game, validate_moves_schema
 
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', required=True)
@@ -25,3 +25,11 @@ class UserSerializer(serializers.ModelSerializer):
         
         profile = UserProfile.objects.create(user=user)
         return profile
+    
+class GameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Game
+        fields = '__all__'
+        extra_kwargs = {
+            'winner': {'read_only': True}
+        }

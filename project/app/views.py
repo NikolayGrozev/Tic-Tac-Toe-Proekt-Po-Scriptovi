@@ -7,6 +7,7 @@ from django.http import Http404
 from . import models
 from . import serializers
 from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT, HTTP_200_OK
+from django.db.models import Q
 
 
 @api_view(['GET'])
@@ -72,44 +73,39 @@ def user(request: Request, pk, format = None):
     elif request.method == 'DELETE':
         user.delete()
         return Response(status=HTTP_204_NO_CONTENT)
-    
 
-# class UsersView(APIView):
-#     def get_users(self, request):
-#         users = models.User.objects.all()
-#         serializer = serializers.UserSerializer(users, many = True)
-#         return Response(serializer.data)
+
+@api_view(['GET'])
+def get_user_games(request: Request, pk, format = None):
+    try:
+        user = models.UserProfile.objects.get(pk = pk)
+    except models.UserProfile.DoesNotExist:
+        raise Http404()
     
-#     def get_user(self, request, pk):
-#         try:
-#             user = models.User.objects.get(pk = pk)
-#             serializer = serializers.UserSerializer(user, many = False)
-#             return Response(serializer.data)
-#         except user.DoesNotExist:
-#             raise Http404()
-        
-#     def post(self, request, format = None):
-#         serializer = serializers.UserSerializer(data = request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status = HTTP_201_CREATED)
-#         return Response(serializer.errors, status = HTTP_400_BAD_REQUEST)
+    games = models.Game.objects.filter(
+        Q(player_x=user) | Q(player_o=user)
+    ).order_by("-id")
+    serializer = serializers.GameSerializer(games, many = True)
+
+    return Response(serializer.data, status = HTTP_200_OK)
+
+@api_view(['POST'])
+def create_game(request: Request, pk_player_x, pk_player_o, format = None):
+    try:
+        player_o = models.UserProfile.objects.get(pk = pk_player_o)
+        player_x = models.UserProfile.objects.get(pk = pk_player_x)
+    except:
+        raise Http404()
     
-#     def put(self, request, pk, format = None):
-#         try:
-#             user = models.User.objects.get(pk = pk)
-#             serializer = serializers.UserSerializer(user, data = request.data)
-#             if serializer.is_valid():
-#                 serializer.save()
-#                 return Response(serializer.data)
-#             return Response(serializer.errors, stauts = HTTP_400_BAD_REQUEST)
-#         except:
-#             raise Http404()
+    data = request.data.copy()
+    data['player_o'] = player_o.pk
+    data['player_x'] = player_x.pk
+
     
-#     def delete(self, request, pk, format = None):
-#         try:
-#             user = models.User.objects.get(pk = pk)
-#             user.delete()
-#             return Response(status=HTTP_204_NO_CONTENT)
-#         except user.DoesNotExist:
-#             raise Http404()
+    serializer = serializers.GameSerializer(data = data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
