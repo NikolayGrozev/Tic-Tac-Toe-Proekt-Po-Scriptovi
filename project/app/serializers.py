@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserProfile, Game, validate_moves_schema
+from .models import UserProfile, Game, validate_moves_schema, FriendRequest
 
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', required=True)
@@ -33,3 +33,8 @@ class GameSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'winner': {'read_only': True}
         }
+
+class FriendRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FriendRequest
+        fields = '__all__'

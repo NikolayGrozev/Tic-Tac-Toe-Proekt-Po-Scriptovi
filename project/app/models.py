@@ -46,8 +46,8 @@ class UserProfile(models.Model):
     friends = models.ManyToManyField('self', blank=True, symmetrical=True)
 
 class Game(models.Model):
-    player_x = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='games_as_x')
-    player_o = models.ForeignKey('UserProfile', on_delete=models.CASCADE, related_name='games_as_o')
+    player_x = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='games_as_x')
+    player_o = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='games_as_o')
     moves = models.JSONField(
         default=list,
         validators=[validate_moves_schema]
@@ -60,3 +60,9 @@ class Game(models.Model):
     )
 
 
+class FriendRequest(models.Model):
+    from_user = models.ForeignKey(UserProfile, related_name='sent_requests', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(UserProfile, related_name='recieved', on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('from_user', 'to_user')
